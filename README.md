@@ -1,7 +1,7 @@
 # Fabulous API Ruby Gem
 
 [![Gem Version](https://badge.fury.io/rb/fabulous.svg)](https://badge.fury.io/rb/fabulous)
-[![CI](https://github.com/usiegj00/api-fabulous-com/actions/workflows/ci.yml/badge.svg)](https://github.com/usiegj00/api-fabulous-com/actions/workflows/ci.yml)
+[![CI](https://github.com/aluminumio/api-fabulous-com/actions/workflows/ci.yml/badge.svg)](https://github.com/aluminumio/api-fabulous-com/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A comprehensive Ruby client for the [Fabulous.com API](https://api.fabulous.com/api_reference.html), providing domain management and DNS configuration capabilities.
