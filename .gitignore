@@ -1,0 +1,61 @@
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+
+# Used by dotenv library to load environment variables.
+.env
+.env.local
+.env.*.local
+
+# Ignore bundler config.
+/.bundle
+/vendor/bundle
+/lib/bundler/man/
+
+# for a library or gem, you might want to ignore these files since the code is
+# intended to run in multiple environments; otherwise, check them in:
+Gemfile.lock
+.ruby-version
+.ruby-gemset
+
+# unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
+.rvmrc
+
+# Used by RuboCop. Remote config files pulled in from inherit_from directive.
+.rubocop-https?--*
+
+# RSpec
+.rspec_status
+
+# Documentation
+/.yardoc/
+/_yardoc/
+/doc/
+/rdoc/
+
+# Development
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Tags (for text editors)
+tags
+TAGS
+
+# Testing artifacts
+/spec/fixtures/.env
+spec/fixtures/vcr_cassettes/
+
+# Logs
+*.log
