@@ -140,7 +140,9 @@ RSpec.describe Fabulous::Resources::Domain do
     it "registers a domain successfully" do
       stub_request(:get, "#{api_url}/registerDomain")
         .with(query: hash_including("username" => "test_user", "password" => "test_pass",
-                                    "domain" => "newdomain.com", "years" => "2", "ns1" => "ns1.example.com", "ns2" => "ns2.example.com", "whoisPrivacy" => "true", "autoRenew" => "false"))
+                                    "domain" => "newdomain.com", "years" => "2",
+                                    "ns1" => "ns1.example.com", "ns2" => "ns2.example.com",
+                                    "whoisPrivacy" => "true", "autoRenew" => "false"))
         .to_return(body: xml_response(200, "Success"))
 
       result = domain_resource.register(

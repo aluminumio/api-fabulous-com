@@ -9,7 +9,8 @@ Gem::Specification.new do |spec|
   spec.email = ["<248302+usiegj00@users.noreply.github.com>"]
 
   spec.summary       = "Ruby client for the Fabulous.com API"
-  spec.description   = "A comprehensive Ruby gem for interacting with the Fabulous.com domain management API with CLI support"
+  spec.description   = "A comprehensive Ruby gem for interacting with the Fabulous.com " \
+                       "domain management API with CLI support"
   spec.homepage      = "https://github.com/usiegj00/api-fabulous-com"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 3.0.0"

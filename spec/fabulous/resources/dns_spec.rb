@@ -236,7 +236,8 @@ RSpec.describe Fabulous::Resources::DNS do
       it "adds a TXT record" do
         stub_request(:get, "#{api_url}/addTXTRecord")
           .with(query: hash_including("username" => "test_user", "password" => "test_pass", "domain" => domain,
-                                      "hostname" => "@", "text" => "v=spf1 include:_spf.google.com ~all", "ttl" => "3600"))
+                                      "hostname" => "@", "text" => "v=spf1 include:_spf.google.com ~all",
+                                      "ttl" => "3600"))
           .to_return(body: xml_response(200, "Success"))
 
         result = dns_resource.add_txt_record(
