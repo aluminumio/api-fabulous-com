@@ -6,7 +6,7 @@ module Fabulous
       def list_records(domain_name, type: nil)
         params = { domain: domain_name }
         params[:type] = type if type
-        
+
         response = request("listDNSrecords", params)
         response.data[:dns_records] || []
       end
@@ -19,11 +19,11 @@ module Fabulous
 
       def add_mx_record(domain_name, hostname:, priority:, ttl: 3600)
         response = request("addMXRecord", {
-          domain: domain_name,
-          hostname: hostname,
-          priority: priority,
-          ttl: ttl
-        })
+                             domain: domain_name,
+                             hostname: hostname,
+                             priority: priority,
+                             ttl: ttl
+                           })
         response.success?
       end
 
@@ -35,7 +35,7 @@ module Fabulous
         params[:hostname] = hostname if hostname
         params[:priority] = priority if priority
         params[:ttl] = ttl if ttl
-        
+
         response = request("updateMXRecord", params)
         response.success?
       end
@@ -53,11 +53,11 @@ module Fabulous
 
       def add_cname_record(domain_name, alias_name:, target:, ttl: 3600)
         response = request("addCNAMERecord", {
-          domain: domain_name,
-          alias: alias_name,
-          target: target,
-          ttl: ttl
-        })
+                             domain: domain_name,
+                             alias: alias_name,
+                             target: target,
+                             ttl: ttl
+                           })
         response.success?
       end
 
@@ -69,7 +69,7 @@ module Fabulous
         params[:alias] = alias_name if alias_name
         params[:target] = target if target
         params[:ttl] = ttl if ttl
-        
+
         response = request("updateCNAMERecord", params)
         response.success?
       end
@@ -87,11 +87,11 @@ module Fabulous
 
       def add_a_record(domain_name, hostname:, ip_address:, ttl: 3600)
         response = request("addARecord", {
-          domain: domain_name,
-          hostname: hostname,
-          ipAddress: ip_address,
-          ttl: ttl
-        })
+                             domain: domain_name,
+                             hostname: hostname,
+                             ipAddress: ip_address,
+                             ttl: ttl
+                           })
         response.success?
       end
 
@@ -103,7 +103,7 @@ module Fabulous
         params[:hostname] = hostname if hostname
         params[:ipAddress] = ip_address if ip_address
         params[:ttl] = ttl if ttl
-        
+
         response = request("updateARecord", params)
         response.success?
       end
@@ -121,11 +121,11 @@ module Fabulous
 
       def add_txt_record(domain_name, hostname:, text:, ttl: 3600)
         response = request("addTXTRecord", {
-          domain: domain_name,
-          hostname: hostname,
-          text: text,
-          ttl: ttl
-        })
+                             domain: domain_name,
+                             hostname: hostname,
+                             text: text,
+                             ttl: ttl
+                           })
         response.success?
       end
 
@@ -137,7 +137,7 @@ module Fabulous
         params[:hostname] = hostname if hostname
         params[:text] = text if text
         params[:ttl] = ttl if ttl
-        
+
         response = request("updateTXTRecord", params)
         response.success?
       end
@@ -155,11 +155,11 @@ module Fabulous
 
       def add_aaaa_record(domain_name, hostname:, ipv6_address:, ttl: 3600)
         response = request("addAAAARecord", {
-          domain: domain_name,
-          hostname: hostname,
-          ipv6Address: ipv6_address,
-          ttl: ttl
-        })
+                             domain: domain_name,
+                             hostname: hostname,
+                             ipv6Address: ipv6_address,
+                             ttl: ttl
+                           })
         response.success?
       end
 
@@ -171,7 +171,7 @@ module Fabulous
         params[:hostname] = hostname if hostname
         params[:ipv6Address] = ipv6_address if ipv6_address
         params[:ttl] = ttl if ttl
-        
+
         response = request("updateAAAARecord", params)
         response.success?
       end

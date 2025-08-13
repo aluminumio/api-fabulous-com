@@ -24,8 +24,8 @@ puts
 puts "1. Getting current nameservers:"
 begin
   current_nameservers = client.domains.get_nameservers(EXAMPLE_DOMAIN)
-  
-  if current_nameservers && current_nameservers.any?
+
+  if current_nameservers&.any?
     puts "Current nameservers for #{EXAMPLE_DOMAIN}:"
     current_nameservers.each_with_index do |ns, index|
       puts "  #{index + 1}. #{ns}"
@@ -48,12 +48,12 @@ begin
     "ns3.example.com",
     "ns4.example.com"
   ]
-  
+
   puts "Setting new nameservers:"
   new_nameservers.each_with_index do |ns, index|
     puts "  #{index + 1}. #{ns}"
   end
-  
+
   if client.domains.set_nameservers(EXAMPLE_DOMAIN, new_nameservers)
     puts "✓ Nameservers updated successfully!"
   else
@@ -69,7 +69,7 @@ puts
 puts "3. Getting detailed domain information:"
 begin
   domain_info = client.domains.info(EXAMPLE_DOMAIN)
-  
+
   if domain_info
     puts "Domain: #{domain_info[:name]}"
     puts "Status: #{domain_info[:status]}"
@@ -78,8 +78,8 @@ begin
     puts "Auto-renew: #{domain_info[:auto_renew] ? 'Enabled' : 'Disabled'}"
     puts "Domain lock: #{domain_info[:locked] ? 'Locked' : 'Unlocked'}"
     puts "WHOIS Privacy: #{domain_info[:whois_privacy] ? 'Enabled' : 'Disabled'}"
-    
-    if domain_info[:nameservers] && domain_info[:nameservers].any?
+
+    if domain_info[:nameservers]&.any?
       puts "Nameservers:"
       domain_info[:nameservers].each_with_index do |ns, index|
         puts "  #{index + 1}. #{ns}"
@@ -99,15 +99,15 @@ puts "4. Bulk nameserver update example:"
 begin
   # Get list of domains to update
   domains_to_update = ["example1.com", "example2.com", "example3.com"]
-  
+
   # Common nameservers to set for all domains
   common_nameservers = [
     "ns1.cloudflare.com",
     "ns2.cloudflare.com"
   ]
-  
+
   puts "Updating nameservers for multiple domains:"
-  
+
   domains_to_update.each do |domain|
     print "  Updating #{domain}... "
     begin
@@ -130,18 +130,18 @@ puts
 puts "5. Verify nameserver changes:"
 begin
   domain_to_verify = EXAMPLE_DOMAIN
-  
+
   puts "Checking nameservers for #{domain_to_verify}:"
-  
+
   # Get nameservers from API
   api_nameservers = client.domains.get_nameservers(domain_to_verify)
-  
+
   if api_nameservers
     puts "Nameservers according to Fabulous API:"
     api_nameservers.each_with_index do |ns, index|
       puts "  #{index + 1}. #{ns}"
     end
-    
+
     puts "\nNote: DNS propagation can take up to 48 hours to complete worldwide."
     puts "You can check propagation status using online tools like whatsmydns.net"
   else
@@ -198,17 +198,17 @@ begin
       false
     end
   end
-  
+
   test_nameservers = [
     "ns1.valid-domain.com",
     "ns2.valid-domain.com",
     "invalid nameserver",
     "ns3.valid-domain.com"
   ]
-  
+
   puts "Validating nameservers before update:"
   valid_nameservers = []
-  
+
   test_nameservers.each do |ns|
     if validate_nameserver(ns)
       puts "  ✓ #{ns} - Valid"
@@ -217,12 +217,12 @@ begin
       puts "  ✗ #{ns} - Invalid format"
     end
   end
-  
+
   if valid_nameservers.length >= 2
     puts "\nReady to update with #{valid_nameservers.length} valid nameservers"
   else
     puts "\nError: At least 2 valid nameservers required"
   end
-rescue => e
+rescue StandardError => e
   puts "Error in validation: #{e.message}"
 end

@@ -19,10 +19,10 @@ module Fabulous
 
     def request(action, params = {})
       params = build_params(action, params)
-      
+
       # The Fabulous API uses GET requests with URL parameters
       url = "/#{action}"
-      
+
       response = connection.get(url) do |req|
         req.params = params
       end
@@ -40,9 +40,12 @@ module Fabulous
       Response.new(response.body).tap do |parsed_response|
         handle_errors(parsed_response)
       end
-    rescue Faraday::TimeoutError => e
+    rescue Faraday::TimeoutError, Net::OpenTimeout, Net::ReadTimeout, Timeout::Error => e
       raise TimeoutError, "Request timed out: #{e.message}"
     rescue Faraday::Error => e
+      # Check if the error message indicates a timeout
+      raise TimeoutError, "Request timed out: #{e.message}" if e.message =~ /timeout|expired/i
+
       raise RequestError, "Request failed: #{e.message}"
     end
 
@@ -57,7 +60,7 @@ module Fabulous
       end
     end
 
-    def build_params(action, params)
+    def build_params(_action, params)
       # Don't include action in params, it's part of the URL path
       {
         username: configuration.username,

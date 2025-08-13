@@ -11,7 +11,7 @@ module Fabulous
           paginate("listDomains", &block)
         end
       end
-      
+
       def all
         paginate("listDomains")
       end
@@ -33,11 +33,11 @@ module Fabulous
           whoisPrivacy: whois_privacy,
           autoRenew: auto_renew
         }
-        
+
         nameservers.each_with_index do |ns, index|
           params["ns#{index + 1}"] = ns
         end
-        
+
         response = request("registerDomain", params)
         response.success?
       end
@@ -54,11 +54,11 @@ module Fabulous
 
       def set_nameservers(domain_name, nameservers)
         params = { domain: domain_name }
-        
+
         nameservers.each_with_index do |ns, index|
           params["ns#{index + 1}"] = ns
         end
-        
+
         response = request("setNameServers", params)
         response.success?
       end

@@ -33,7 +33,7 @@ puts
 puts "1. Check domain availability:"
 begin
   domains_to_check = ["example123test.com", "google.com", "my-new-domain.net"]
-  
+
   domains_to_check.each do |domain|
     available = client.domains.check(domain)
     status = available ? "✓ Available" : "✗ Not available"
@@ -49,10 +49,10 @@ puts
 puts "2. Register a new domain:"
 begin
   domain_to_register = "my-awesome-domain.com"
-  
+
   if client.domains.check(domain_to_register)
     puts "  Registering #{domain_to_register}..."
-    
+
     success = client.domains.register(
       domain_to_register,
       years: 2,
@@ -60,7 +60,7 @@ begin
       whois_privacy: true,
       auto_renew: true
     )
-    
+
     if success
       puts "  ✓ Domain registered successfully!"
     else
@@ -80,9 +80,9 @@ puts "3. Renew a domain:"
 begin
   domain_to_renew = "example.com"
   years = 1
-  
+
   puts "  Renewing #{domain_to_renew} for #{years} year(s)..."
-  
+
   if client.domains.renew(domain_to_renew, years: years)
     puts "  ✓ Domain renewed successfully!"
   else
@@ -98,18 +98,14 @@ puts
 puts "4. Domain lock management:"
 begin
   domain = "example.com"
-  
+
   # Lock domain
   puts "  Locking #{domain}..."
-  if client.domains.lock(domain)
-    puts "  ✓ Domain locked"
-  end
-  
+  puts "  ✓ Domain locked" if client.domains.lock(domain)
+
   # Unlock domain
   puts "  Unlocking #{domain}..."
-  if client.domains.unlock(domain)
-    puts "  ✓ Domain unlocked"
-  end
+  puts "  ✓ Domain unlocked" if client.domains.unlock(domain)
 rescue Fabulous::Error => e
   puts "  Error: #{e.message}"
 end
@@ -120,18 +116,14 @@ puts
 puts "5. Auto-renewal management:"
 begin
   domain = "example.com"
-  
+
   # Enable auto-renewal
   puts "  Enabling auto-renewal for #{domain}..."
-  if client.domains.set_auto_renew(domain, enabled: true)
-    puts "  ✓ Auto-renewal enabled"
-  end
-  
+  puts "  ✓ Auto-renewal enabled" if client.domains.set_auto_renew(domain, enabled: true)
+
   # Disable auto-renewal
   puts "  Disabling auto-renewal for #{domain}..."
-  if client.domains.set_auto_renew(domain, enabled: false)
-    puts "  ✓ Auto-renewal disabled"
-  end
+  puts "  ✓ Auto-renewal disabled" if client.domains.set_auto_renew(domain, enabled: false)
 rescue Fabulous::Error => e
   puts "  Error: #{e.message}"
 end
@@ -142,18 +134,14 @@ puts
 puts "6. WHOIS Privacy management:"
 begin
   domain = "example.com"
-  
+
   # Enable WHOIS privacy
   puts "  Enabling WHOIS privacy for #{domain}..."
-  if client.domains.enable_whois_privacy(domain)
-    puts "  ✓ WHOIS privacy enabled"
-  end
-  
+  puts "  ✓ WHOIS privacy enabled" if client.domains.enable_whois_privacy(domain)
+
   # Disable WHOIS privacy
   puts "  Disabling WHOIS privacy for #{domain}..."
-  if client.domains.disable_whois_privacy(domain)
-    puts "  ✓ WHOIS privacy disabled"
-  end
+  puts "  ✓ WHOIS privacy disabled" if client.domains.disable_whois_privacy(domain)
 rescue Fabulous::Error => e
   puts "  Error: #{e.message}"
 end
@@ -175,7 +163,7 @@ domain = "example.com"
 puts "1. List all DNS records:"
 begin
   records = client.dns.list_records(domain)
-  
+
   if records.any?
     puts "  DNS records for #{domain}:"
     records.each do |record|
@@ -203,14 +191,14 @@ begin
   )
     puts "  ✓ A record added"
   end
-  
+
   # List A records
   a_records = client.dns.a_records(domain)
   puts "  Current A records:"
   a_records.each do |record|
     puts "    - #{record[:hostname]} -> #{record[:ip_address]} (TTL: #{record[:ttl]})"
   end
-  
+
   # Update A record (if we have a record ID)
   if a_records.first
     puts "  Updating first A record..."
@@ -241,7 +229,7 @@ begin
   )
     puts "  ✓ AAAA record added"
   end
-  
+
   # List AAAA records
   aaaa_records = client.dns.aaaa_records(domain)
   puts "  Current AAAA records:"
@@ -267,7 +255,7 @@ begin
   )
     puts "  ✓ CNAME record added"
   end
-  
+
   # List CNAME records
   cname_records = client.dns.cname_records(domain)
   puts "  Current CNAME records:"
@@ -288,19 +276,19 @@ begin
     { hostname: "mail.example.com", priority: 10 },
     { hostname: "mail2.example.com", priority: 20 }
   ]
-  
+
   mx_records_to_add.each do |mx|
     puts "  Adding MX record: #{mx[:hostname]} (priority: #{mx[:priority]})"
-    if client.dns.add_mx_record(
+    next unless client.dns.add_mx_record(
       domain,
       hostname: mx[:hostname],
       priority: mx[:priority],
       ttl: 3600
     )
-      puts "  ✓ MX record added"
-    end
+
+    puts "  ✓ MX record added"
   end
-  
+
   # List MX records
   mx_records = client.dns.mx_records(domain)
   puts "  Current MX records:"
@@ -321,19 +309,19 @@ begin
     { hostname: "@", text: "v=spf1 include:_spf.google.com ~all" },
     { hostname: "_dmarc", text: "v=DMARC1; p=none; rua=mailto:dmarc@example.com" }
   ]
-  
+
   txt_records_to_add.each do |txt|
     puts "  Adding TXT record for #{txt[:hostname]}"
-    if client.dns.add_txt_record(
+    next unless client.dns.add_txt_record(
       domain,
       hostname: txt[:hostname],
       text: txt[:text],
       ttl: 3600
     )
-      puts "  ✓ TXT record added"
-    end
+
+    puts "  ✓ TXT record added"
   end
-  
+
   # List TXT records
   txt_records = client.dns.txt_records(domain)
   puts "  Current TXT records:"
@@ -390,23 +378,23 @@ puts
 puts "1. Multiple client instances:"
 begin
   # Client 1 with specific configuration
-  client1 = Fabulous::Client.new(
+  Fabulous::Client.new(
     Fabulous::Configuration.new.tap do |c|
       c.username = "user1"
       c.password = "pass1"
       c.timeout = 60
     end
   )
-  
+
   # Client 2 with different configuration
-  client2 = Fabulous::Client.new(
+  Fabulous::Client.new(
     Fabulous::Configuration.new.tap do |c|
       c.username = "user2"
       c.password = "pass2"
       c.timeout = 30
     end
   )
-  
+
   puts "  Created two separate client instances with different configurations"
 rescue Fabulous::Error => e
   puts "  Error: #{e.message}"
@@ -420,21 +408,19 @@ begin
   domains_to_process = ["domain1.com", "domain2.com", "domain3.com"]
   total = domains_to_process.length
   processed = 0
-  
+
   puts "  Processing #{total} domains..."
-  
+
   domains_to_process.each do |domain|
-    begin
-      # Perform operation (e.g., enable auto-renewal)
-      client.domains.set_auto_renew(domain, enabled: true)
-      processed += 1
-      progress = (processed.to_f / total * 100).round
-      puts "  [#{progress}%] ✓ Processed #{domain}"
-    rescue Fabulous::Error => e
-      puts "  [ERROR] Failed to process #{domain}: #{e.message}"
-    end
+    # Perform operation (e.g., enable auto-renewal)
+    client.domains.set_auto_renew(domain, enabled: true)
+    processed += 1
+    progress = (processed.to_f / total * 100).round
+    puts "  [#{progress}%] ✓ Processed #{domain}"
+  rescue Fabulous::Error => e
+    puts "  [ERROR] Failed to process #{domain}: #{e.message}"
   end
-  
+
   puts "  Completed: #{processed}/#{total} domains processed"
 rescue Fabulous::Error => e
   puts "  Error: #{e.message}"

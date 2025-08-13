@@ -28,7 +28,7 @@ module Fabulous
 
         puts
         puts @pastel.bold.cyan("Nameservers for #{domain_name}:")
-        if nameservers && nameservers.any?
+        if nameservers&.any?
           nameservers.each_with_index do |ns, i|
             puts "  #{@pastel.dim("#{i + 1}.")} #{@pastel.white(ns)}"
           end
@@ -72,8 +72,8 @@ module Fabulous
 
     def configure_client
       Fabulous.configure do |config|
-        config.username = ENV["FABULOUS_USERNAME"]
-        config.password = ENV["FABULOUS_PASSWORD"]
+        config.username = ENV.fetch("FABULOUS_USERNAME", nil)
+        config.password = ENV.fetch("FABULOUS_PASSWORD", nil)
       end
     end
 
@@ -91,7 +91,7 @@ module Fabulous
     end
 
     desc "list DOMAIN", "List all DNS records for a domain"
-    option :type, type: :string, enum: ["A", "AAAA", "CNAME", "MX", "TXT"], desc: "Filter by record type"
+    option :type, type: :string, enum: %w[A AAAA CNAME MX TXT], desc: "Filter by record type"
     def list(domain_name)
       spinner = TTY::Spinner.new("#{@pastel.cyan('⚡')} Fetching DNS records... ", format: :dots)
       spinner.auto_spin
@@ -114,58 +114,58 @@ module Fabulous
     desc "add DOMAIN", "Add a DNS record interactively"
     def add(domain_name)
       type = @prompt.select("Choose record type:", %w[A AAAA CNAME MX TXT])
-      
+
       case type
       when "A"
         hostname = @prompt.ask("Hostname (e.g., www or @ for root):")
         ip = @prompt.ask("IP Address:")
         ttl = @prompt.ask("TTL:", default: "3600").to_i
-        
+
         spinner = TTY::Spinner.new("#{@pastel.cyan('⚡')} Adding A record... ", format: :dots)
         spinner.auto_spin
-        
+
         if client.dns.add_a_record(domain_name, hostname: hostname, ip_address: ip, ttl: ttl)
           spinner.success(@pastel.green("✓ A record added"))
         else
           spinner.error(@pastel.red("✗ Failed to add record"))
         end
-        
+
       when "MX"
         hostname = @prompt.ask("Mail server hostname:")
         priority = @prompt.ask("Priority:", default: "10").to_i
         ttl = @prompt.ask("TTL:", default: "3600").to_i
-        
+
         spinner = TTY::Spinner.new("#{@pastel.cyan('⚡')} Adding MX record... ", format: :dots)
         spinner.auto_spin
-        
+
         if client.dns.add_mx_record(domain_name, hostname: hostname, priority: priority, ttl: ttl)
           spinner.success(@pastel.green("✓ MX record added"))
         else
           spinner.error(@pastel.red("✗ Failed to add record"))
         end
-        
+
       when "CNAME"
         alias_name = @prompt.ask("Alias (e.g., blog):")
         target = @prompt.ask("Target domain:")
         ttl = @prompt.ask("TTL:", default: "3600").to_i
-        
+
         spinner = TTY::Spinner.new("#{@pastel.cyan('⚡')} Adding CNAME record... ", format: :dots)
         spinner.auto_spin
-        
+
         if client.dns.add_cname_record(domain_name, alias_name: alias_name, target: target, ttl: ttl)
           spinner.success(@pastel.green("✓ CNAME record added"))
         else
           spinner.error(@pastel.red("✗ Failed to add record"))
         end
-        
+
       when "TXT"
         hostname = @prompt.ask("Hostname (@ for root):")
         text = @prompt.ask("Text value:")
         ttl = @prompt.ask("TTL:", default: "3600").to_i
-        
+
         spinner = TTY::Spinner.new("#{@pastel.cyan('⚡')} Adding TXT record... ", format: :dots)
         spinner.auto_spin
-        
+
         if client.dns.add_txt_record(domain_name, hostname: hostname, text: text, ttl: ttl)
           spinner.success(@pastel.green("✓ TXT record added"))
         else
@@ -181,8 +181,8 @@ module Fabulous
 
     def configure_client
       Fabulous.configure do |config|
-        config.username = ENV["FABULOUS_USERNAME"]
-        config.password = ENV["FABULOUS_PASSWORD"]
+        config.username = ENV.fetch("FABULOUS_USERNAME", nil)
+        config.password = ENV.fetch("FABULOUS_PASSWORD", nil)
       end
     end
 
@@ -223,13 +223,14 @@ module Fabulous
         "MX" => :blue,
         "TXT" => :magenta
       }
-      
+
       color = colors[type] || :white
       @pastel.send(color, type || "?")
     end
 
     def truncate(text, length)
       return "-" unless text
+
       text.length > length ? "#{text[0...length]}..." : text
     end
   end
@@ -247,7 +248,7 @@ module Fabulous
     end
 
     desc "list", "List all domains in your portfolio"
-    option :sort, type: :string, enum: ["name", "expiry", "status"], default: "name", desc: "Sort by field"
+    option :sort, type: :string, enum: %w[name expiry status], default: "name", desc: "Sort by field"
     option :filter, type: :string, desc: "Filter domains by name (partial match)"
     option :expiring, type: :numeric, desc: "Show domains expiring within N days"
     option :page, type: :numeric, desc: "Show specific page (without pagination)"
@@ -275,10 +276,11 @@ module Fabulous
           today = Date.today
           domains = domains.select do |d|
             next false unless d[:expiry_date]
+
             begin
               expiry = Date.parse(d[:expiry_date])
               days = (expiry - today).to_i
-              days > 0 && days <= options[:expiring]
+              days.positive? && days <= options[:expiring]
             rescue ArgumentError
               false
             end
@@ -308,12 +310,12 @@ module Fabulous
 
       begin
         info = client.domains.info(domain_name)
-        
+
         if info.nil?
           spinner.error(@pastel.red("✗ Domain not found or no information available"))
           exit 1
         end
-        
+
         spinner.success(@pastel.green("✓ Domain found"))
 
         puts
@@ -325,14 +327,26 @@ module Fabulous
         display_info_item("Status", info[:status] || "Active", status_color(info[:status]))
         display_info_item("Created", info[:creation_date] || "-")
         display_info_item("Expires", info[:expiry_date] || "-", expiry_color(info[:expiry_date]))
-        display_info_item("Auto-Renew", info[:auto_renew].nil? ? "-" : (info[:auto_renew] ? "Enabled" : "Disabled"), 
-                         info[:auto_renew] ? :green : nil)
-        display_info_item("Domain Lock", info[:locked].nil? ? "-" : (info[:locked] ? "Locked" : "Unlocked"),
-                         info[:locked] ? :green : nil)
-        display_info_item("WHOIS Privacy", info[:whois_privacy].nil? ? "-" : (info[:whois_privacy] ? "Enabled" : "Disabled"),
-                         info[:whois_privacy] ? :green : nil)
+        display_info_item("Auto-Renew", if info[:auto_renew].nil?
+                                          "-"
+                                        else
+                                          (info[:auto_renew] ? "Enabled" : "Disabled")
+                                        end,
+                          info[:auto_renew] ? :green : nil)
+        display_info_item("Domain Lock", if info[:locked].nil?
+                                           "-"
+                                         else
+                                           (info[:locked] ? "Locked" : "Unlocked")
+                                         end,
+                          info[:locked] ? :green : nil)
+        display_info_item("WHOIS Privacy", if info[:whois_privacy].nil?
+                                             "-"
+                                           else
+                                             (info[:whois_privacy] ? "Enabled" : "Disabled")
+                                           end,
+                          info[:whois_privacy] ? :green : nil)
 
-        if info[:nameservers] && info[:nameservers].any?
+        if info[:nameservers]&.any?
           puts
           puts @pastel.bold.cyan("Nameservers:")
           info[:nameservers].each_with_index do |ns, i|
@@ -371,7 +385,7 @@ module Fabulous
 
       begin
         available = client.domains.check(domain_name)
-        
+
         if available
           spinner.success(@pastel.green("✓ #{domain_name} is available!"))
         else
@@ -404,7 +418,9 @@ module Fabulous
 
         # Group by year
         by_year = domains.group_by do |d|
-          Date.parse(d[:expiry_date]).year rescue "Unknown"
+          Date.parse(d[:expiry_date]).year
+        rescue StandardError
+          "Unknown"
         end
 
         puts @pastel.bold("Domains by Expiry Year:")
@@ -418,22 +434,24 @@ module Fabulous
         today = Date.today
         expiring_30 = domains.count do |d|
           next false unless d[:expiry_date]
+
           begin
             expiry = Date.parse(d[:expiry_date])
             days = (expiry - today).to_i
-            days > 0 && days <= 30
-          rescue
+            days.positive? && days <= 30
+          rescue StandardError
             false
           end
         end
 
         expiring_90 = domains.count do |d|
           next false unless d[:expiry_date]
+
           begin
             expiry = Date.parse(d[:expiry_date])
             days = (expiry - today).to_i
-            days > 0 && days <= 90
-          rescue
+            days.positive? && days <= 90
+          rescue StandardError
             false
           end
         end
@@ -460,18 +478,18 @@ module Fabulous
 
     def configure_client
       Fabulous.configure do |config|
-        config.username = ENV["FABULOUS_USERNAME"]
-        config.password = ENV["FABULOUS_PASSWORD"]
+        config.username = ENV.fetch("FABULOUS_USERNAME", nil)
+        config.password = ENV.fetch("FABULOUS_PASSWORD", nil)
       end
 
-      unless Fabulous.configuration.valid?
-        puts @pastel.red("✗ Error: Missing credentials")
-        puts "Please set FABULOUS_USERNAME and FABULOUS_PASSWORD environment variables"
-        puts "You can create a .env file with:"
-        puts "  FABULOUS_USERNAME=your_username"
-        puts "  FABULOUS_PASSWORD=your_password"
-        exit 1
-      end
+      return if Fabulous.configuration.valid?
+
+      puts @pastel.red("✗ Error: Missing credentials")
+      puts "Please set FABULOUS_USERNAME and FABULOUS_PASSWORD environment variables"
+      puts "You can create a .env file with:"
+      puts "  FABULOUS_USERNAME=your_username"
+      puts "  FABULOUS_PASSWORD=your_password"
+      exit 1
     end
 
     def client
@@ -496,7 +514,7 @@ module Fabulous
         # Non-interactive display - show all or limited number
         display_limit = limit || domains.length
         domains_to_show = domains.first(display_limit)
-        
+
         table = TTY::Table.new(
           header: [
             @pastel.bold("Domain"),
@@ -506,10 +524,10 @@ module Fabulous
           ]
         )
 
-        today = Date.today
+        Date.today
         domains_to_show.each do |domain|
           days_left = calculate_days_left(domain[:expiry_date])
-          
+
           table << [
             @pastel.white(domain[:name]),
             status_badge(domain[:status]),
@@ -520,7 +538,7 @@ module Fabulous
 
         puts
         puts table.render(:unicode, padding: [0, 1], border: { style: :cyan })
-        
+
         if domains.length > display_limit
           puts
           puts @pastel.dim("Showing #{display_limit} of #{domains.length} domains (use --limit to show more)")
@@ -546,10 +564,10 @@ module Fabulous
           ]
         )
 
-        today = Date.today
+        Date.today
         page_domains.each do |domain|
           days_left = calculate_days_left(domain[:expiry_date])
-          
+
           table << [
             @pastel.white(domain[:name]),
             status_badge(domain[:status]),
@@ -560,27 +578,25 @@ module Fabulous
 
         puts
         puts table.render(:unicode, padding: [0, 1], border: { style: :cyan })
-        
-        if pages > 1
-          puts
-          puts @pastel.dim("Page #{current_page + 1} of #{pages} (#{domains.length} total domains)")
-          
-          choices = []
-          choices << "Next page" if current_page < pages - 1
-          choices << "Previous page" if current_page > 0
-          choices << "Exit"
 
-          choice = @prompt.select("Navigate:", choices, cycle: true)
-          
-          case choice
-          when "Next page"
-            current_page += 1
-          when "Previous page"
-            current_page -= 1
-          when "Exit"
-            break
-          end
-        else
+        break unless pages > 1
+
+        puts
+        puts @pastel.dim("Page #{current_page + 1} of #{pages} (#{domains.length} total domains)")
+
+        choices = []
+        choices << "Next page" if current_page < pages - 1
+        choices << "Previous page" if current_page.positive?
+        choices << "Exit"
+
+        choice = @prompt.select("Navigate:", choices, cycle: true)
+
+        case choice
+        when "Next page"
+          current_page += 1
+        when "Previous page"
+          current_page -= 1
+        when "Exit"
           break
         end
       end
@@ -588,6 +604,7 @@ module Fabulous
 
     def calculate_days_left(expiry_date)
       return nil unless expiry_date
+
       begin
         expiry = Date.parse(expiry_date)
         (expiry - Date.today).to_i
@@ -598,8 +615,8 @@ module Fabulous
 
     def days_left_badge(days)
       return "-" if days.nil?
-      
-      if days < 0
+
+      if days.negative?
         @pastel.red("Expired")
       elsif days <= 30
         @pastel.red("#{days}d")
@@ -634,15 +651,14 @@ module Fabulous
       when "active" then :green
       when "inactive" then :red
       when "pending" then :yellow
-      else nil
       end
     end
 
     def expiry_color(expiry_date)
       days = calculate_days_left(expiry_date)
       return nil unless days
-      
-      if days < 0
+
+      if days.negative?
         :red
       elsif days <= 30
         :red
@@ -654,7 +670,7 @@ module Fabulous
     end
 
     def color_expiry_count(count)
-      if count == 0
+      if count.zero?
         @pastel.green(count.to_s)
       elsif count <= 5
         @pastel.yellow(count.to_s)
